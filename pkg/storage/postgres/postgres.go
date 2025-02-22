@@ -81,8 +81,51 @@ func (s *Store) Close() {
 // }
 
 // Получение всех публикаций
+// VER 1
+// func (s *Store) Posts() ([]storage.Post, error) {
+// 	rows, err := s.db.Query("SELECT id, title, content, author_id, created_at FROM posts")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var posts []storage.Post
+// 	for rows.Next() {
+// 		var p storage.Post
+// 		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.AuthorID, &p.CreatedAt); err != nil {
+// 			return nil, err
+// 		}
+// 		posts = append(posts, p)
+// 	}
+
+// 	return posts, nil
+// }
+
+// VER 2
+// func (db *Store) Posts() ([]storage.Post, error) {
+
+// 	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.name FROM posts JOIN authors ON posts.author_id = authors.id")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var posts []storage.Post
+// 	for rows.Next() {
+// 		var p storage.Post
+// 		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorName)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		posts = append(posts, p)
+// 	}
+
+//		return posts, nil
+//	}
+//
+// VER 3
 func (s *Store) Posts() ([]storage.Post, error) {
-	rows, err := s.db.Query("SELECT id, title, content, author_id, created_at FROM posts")
+	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.id, authors.name, authors.avatar_url FROM posts JOIN authors ON posts.author_id = authors.id")
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +134,7 @@ func (s *Store) Posts() ([]storage.Post, error) {
 	var posts []storage.Post
 	for rows.Next() {
 		var p storage.Post
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.AuthorID, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorID, &p.AuthorName, &p.AuthorAvatar); err != nil {
 			return nil, err
 		}
 		posts = append(posts, p)

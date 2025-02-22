@@ -3,7 +3,11 @@ package api
 import (
 	"GoNews/pkg/storage"
 	"encoding/json"
+	"html/template"
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -31,6 +35,45 @@ func (api *API) endpoints() {
 	api.router.HandleFunc("/posts", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.updatePostHandler).Methods(http.MethodPut, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)
+	api.router.HandleFunc("/", api.homeHandler).Methods(http.MethodGet)
+
+	// Обработка статических файлов
+	api.router.PathPrefix("/static/").HandlerFunc(api.staticFileHandler())
+}
+
+// Обработчик статических файлов
+func (api *API) staticFileHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Определяем путь к файлу
+		filePath := filepath.Join("static", r.URL.Path[len("/static/"):])
+
+		// Проверка существования файла
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			http.Error(w, "404 not found", http.StatusNotFound)
+			return
+		}
+
+		// Логирование запроса
+		log.Printf("Serving static file: %s", filePath)
+
+		http.ServeFile(w, r, filePath)
+	}
+}
+
+func (api *API) homeHandler(w http.ResponseWriter, r *http.Request) {
+	posts, err := api.db.Posts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, posts)
 }
 
 // Получение маршрутизатора запросов.

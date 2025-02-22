@@ -52,7 +52,6 @@ func main() {
 	// }
 	// srv.db = db3
 
-	// Запуск API
 	srv.api = api.New(srv.db)
 	log.Println("Сервер запущен на :8080")
 	http.ListenAndServe(":8080", srv.api.Router())

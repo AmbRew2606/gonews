@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статьи</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Статьи</h1>
+
+    <div id="posts">
+        {{range .}}
+        <div class="post__container">
+            <div class="post__title">
+                <h2>{{.Title}}</h2>
+            </div>
+            <div class="post__content">
+                <p>{{.Content}}</p>
+            </div>
+            <div class="post__authorBlock">
+                <img src="{{.AuthorAvatar}}" alt="{{.AuthorName}}" class="post__authorBlock__avatar">
+                <div class="post__authorBlock_info">
+                    <div class="post__authorBlock__title">
+                        {{.AuthorName}}
+                    </div>
+                    <div class="post__authorBlock__time">
+                        {{.CreatedAt}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <h2>Добавить новую статью</h2>
+    <form id="postForm" method="POST" action="/posts">
+        <input type="text" name="title" placeholder="Заголовок" required>
+        <textarea name="content" placeholder="Содержимое" required></textarea>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <script>
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Отменяем стандартное поведение формы
+
+            const formData = new FormData(this);
+            const data = {
+                title: formData.get('title'),
+                content: formData.get('content')
+            };
+
+            fetch('/posts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload(); // Обновляем страницу при успешном добавлении
+                } else {
+                    alert('Ошибка при добавлении статьи');
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>
