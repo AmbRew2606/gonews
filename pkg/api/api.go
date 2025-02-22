@@ -30,7 +30,7 @@ func (api *API) endpoints() {
 	api.router.HandleFunc("/posts/all", api.postsHandler).Methods(http.MethodGet, http.MethodOptions)
 	api.router.HandleFunc("/posts", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.updatePostHandler).Methods(http.MethodPut, http.MethodOptions)
-	api.router.HandleFunc("/posts", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)
+	api.router.HandleFunc("/posts/{id}", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)
 }
 
 // Получение маршрутизатора запросов.
