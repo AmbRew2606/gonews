@@ -26,7 +26,7 @@ func New(db storage.Interface) *API {
 
 // Регистрация обработчиков API.
 func (api *API) endpoints() {
-	api.router.HandleFunc("/posts", api.postsHandler).Methods(http.MethodGet, http.MethodOptions)
+	api.router.HandleFunc("/posts/all", api.postsHandler).Methods(http.MethodGet, http.MethodOptions)
 	api.router.HandleFunc("/posts", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
 	api.router.HandleFunc("/posts", api.updatePostHandler).Methods(http.MethodPut, http.MethodOptions)
 	api.router.HandleFunc("/posts", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)

@@ -3,10 +3,12 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"GoNews/pkg/storage"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -19,7 +21,31 @@ type Store struct {
 }
 
 // New создаёт новое подключение к MongoDB.
-func New(uri string) (*Store, error) {
+// func New(uri string) (*Store, error) {
+// 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
+// 	if err != nil {
+// 		return nil, fmt.Errorf("ошибка создания клиента MongoDB: %w", err)
+// 	}
+
+// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// 	defer cancel()
+
+// 	if err := client.Connect(ctx); err != nil {
+// 		return nil, fmt.Errorf("ошибка подключения к MongoDB: %w", err)
+// 	}
+
+//		collection := client.Database("gonews").Collection("posts")
+//		return &Store{client: client, collection: collection}, nil
+//	}
+func New() (*Store, error) {
+	// Загружаем переменные окружения
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("не удалось загрузить .env файл: %w", err)
+	}
+
+	uri := os.Getenv("MONGO_URI") // Получаем строку подключения из .env
+
 	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
 	if err != nil {
 		return nil, fmt.Errorf("ошибка создания клиента MongoDB: %w", err)
