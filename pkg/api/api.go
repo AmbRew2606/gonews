@@ -4,13 +4,18 @@ import (
 	"GoNews/pkg/storage"
 	"encoding/json"
 	"html/template"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/nfnt/resize"
 )
 
 // Программный интерфейс сервера GoNews
@@ -35,10 +40,15 @@ func (api *API) endpoints() {
 	api.router.HandleFunc("/posts", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.updatePostHandler).Methods(http.MethodPut, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)
+
 	api.router.HandleFunc("/", api.homeHandler).Methods(http.MethodGet)
 
 	// Обработка статических файлов
 	api.router.PathPrefix("/static/").HandlerFunc(api.staticFileHandler())
+
+	//добавление пользователя
+	api.router.HandleFunc("/add-user", api.addUserPageHandler).Methods("GET") // Для отображения формы
+	api.router.HandleFunc("/add-user", api.addUserHandler).Methods("POST")    // Для обработки формы
 }
 
 // Обработчик статических файлов
@@ -58,6 +68,16 @@ func (api *API) staticFileHandler() http.HandlerFunc {
 
 		http.ServeFile(w, r, filePath)
 	}
+}
+
+// обработчик ГЕТ юзер
+func (api *API) addUserPageHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("templates/add_user.html")
+	if err != nil {
+		http.Error(w, "Ошибка загрузки страницы", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
 }
 
 func (api *API) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -216,4 +236,82 @@ func (api *API) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+// обработка фоток
+// Добавление пользователя с аватаркой
+func (api *API) addUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Получаем имя пользователя
+	name := r.FormValue("name")
+	if name == "" {
+		http.Error(w, "Имя не может быть пустым", http.StatusBadRequest)
+		return
+	}
+
+	// Получаем файл аватарки
+	file, header, err := r.FormFile("avatar")
+	if err != nil {
+		http.Error(w, "Ошибка загрузки файла", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Определяем расширение файла
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" {
+		http.Error(w, "Неподдерживаемый формат (только JPG, PNG)", http.StatusBadRequest)
+		return
+	}
+
+	// Формируем путь к файлу: av_имя.jpg
+	avatarPath := "static/avatars/av_" + name + ext
+
+	// Декодируем изображение
+	var img image.Image
+	if ext == ".png" {
+		img, err = png.Decode(file)
+	} else {
+		img, err = jpeg.Decode(file)
+	}
+	if err != nil {
+		http.Error(w, "Ошибка декодирования изображения", http.StatusInternalServerError)
+		return
+	}
+
+	// Сжимаем до 32x32
+	img = resize.Resize(32, 32, img, resize.Lanczos3)
+
+	// Создаём файл для сохранения
+	outFile, err := os.Create(avatarPath)
+	if err != nil {
+		http.Error(w, "Ошибка сохранения файла", http.StatusInternalServerError)
+		return
+	}
+	defer outFile.Close()
+
+	// Кодируем и сохраняем
+	if ext == ".png" {
+		err = png.Encode(outFile, img)
+	} else {
+		err = jpeg.Encode(outFile, img, nil)
+	}
+	if err != nil {
+		http.Error(w, "Ошибка кодирования изображения", http.StatusInternalServerError)
+		return
+	}
+
+	// Добавляем пользователя в БД
+	err = api.db.AddAuthor(storage.Author{Name: name, AvatarURL: "/" + avatarPath})
+	if err != nil {
+		http.Error(w, "Ошибка сохранения пользователя", http.StatusInternalServerError)
+		return
+	}
+
+	// Успех
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

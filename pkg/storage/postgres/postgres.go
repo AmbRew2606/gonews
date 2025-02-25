@@ -124,8 +124,33 @@ func (s *Store) Close() {
 //	}
 //
 // VER 3
+// func (s *Store) Posts() ([]storage.Post, error) {
+// 	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.id, authors.name, authors.avatar_url FROM posts JOIN authors ON posts.author_id = authors.id")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var posts []storage.Post
+// 	for rows.Next() {
+// 		var p storage.Post
+// 		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorID, &p.AuthorName, &p.AuthorAvatar); err != nil {
+// 			return nil, err
+// 		}
+// 		posts = append(posts, p)
+// 	}
+
+//		return posts, nil
+//	}
+//
+// VER 4
 func (s *Store) Posts() ([]storage.Post, error) {
-	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.id, authors.name, authors.avatar_url FROM posts JOIN authors ON posts.author_id = authors.id")
+	rows, err := s.db.Query(`
+        SELECT posts.id, posts.title, posts.content, posts.created_at, 
+               authors.id, authors.name, authors.avatar_url 
+        FROM posts 
+        JOIN authors ON posts.author_id = authors.id
+    `)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +159,13 @@ func (s *Store) Posts() ([]storage.Post, error) {
 	var posts []storage.Post
 	for rows.Next() {
 		var p storage.Post
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorID, &p.AuthorName, &p.AuthorAvatar); err != nil {
+		var a storage.Author // Создаём объект автора
+
+		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &a.ID, &a.Name, &a.AvatarURL); err != nil {
 			return nil, err
 		}
+
+		p.Author = a // Присваиваем автора в структуру поста
 		posts = append(posts, p)
 	}
 
@@ -182,3 +211,18 @@ func (s *Store) DeletePost(p storage.Post) error {
 // 	_, err := s.db.Exec("DELETE FROM posts WHERE id=$1", p.ID)
 // 	return err
 // }
+
+func (s *Store) AddAuthor(a storage.Author) error {
+	_, err := s.db.Exec(`INSERT INTO authors (name, avatar_url) VALUES ($1, $2)`, a.Name, a.AvatarURL)
+	return err
+}
+
+func (s *Store) GetAuthorByID(id int) (storage.Author, error) {
+	var a storage.Author
+	err := s.db.QueryRow(`SELECT id, name, avatar_url FROM authors WHERE id = $1`, id).
+		Scan(&a.ID, &a.Name, &a.AvatarURL)
+	if err != nil {
+		return storage.Author{}, err
+	}
+	return a, nil
+}
