@@ -18,6 +18,11 @@ type Author struct {
 	AvatarURL string
 }
 
+// PageData - структура для передачи данных в шаблоны.
+type PageData struct {
+	Authors []Author // Список авторов
+}
+
 // Interface задаёт контракт на работу с БД.
 type Interface interface {
 	Posts() ([]Post, error) // получение всех публикаций
@@ -28,4 +33,5 @@ type Interface interface {
 	// Новый метод для работы с авторами
 	AddAuthor(Author) error            // создание нового автора
 	GetAuthorByID(int) (Author, error) // получение автора по ID
+	GetAuthors() ([]Author, error)     // получение всех авторов
 }

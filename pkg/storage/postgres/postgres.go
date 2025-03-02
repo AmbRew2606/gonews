@@ -174,8 +174,9 @@ func (s *Store) Posts() ([]storage.Post, error) {
 
 // Добавление публикации
 func (s *Store) AddPost(p storage.Post) error {
-	_, err := s.db.Exec("INSERT INTO posts (title, content, author_id, created_at) VALUES ($1, $2, $3, $4)",
-		p.Title, p.Content, p.AuthorID, p.CreatedAt)
+	// p.CreatedAt = time.Now().Unix()
+	_, err := s.db.Exec("INSERT INTO posts (title, content, author_id) VALUES ($1, $2, $3)",
+		p.Title, p.Content, p.AuthorID)
 	return err
 }
 
@@ -225,4 +226,23 @@ func (s *Store) GetAuthorByID(id int) (storage.Author, error) {
 		return storage.Author{}, err
 	}
 	return a, nil
+}
+
+func (s *Store) GetAuthors() ([]storage.Author, error) {
+	rows, err := s.db.Query("SELECT id, name, avatar_url FROM authors")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var authors []storage.Author
+	for rows.Next() {
+		var a storage.Author
+		if err := rows.Scan(&a.ID, &a.Name, &a.AvatarURL); err != nil {
+			return nil, err
+		}
+		authors = append(authors, a)
+	}
+
+	return authors, nil
 }

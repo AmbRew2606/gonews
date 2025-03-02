@@ -3,6 +3,7 @@ package api
 import (
 	"GoNews/pkg/storage"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"image"
 	"image/jpeg"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
@@ -37,7 +39,7 @@ func New(db storage.Interface) *API {
 // Регистрация обработчиков API.
 func (api *API) endpoints() {
 	api.router.HandleFunc("/posts/all", api.postsHandler).Methods(http.MethodGet, http.MethodOptions)
-	api.router.HandleFunc("/posts", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
+	// api.router.HandleFunc("/add-post", api.addPostHandler).Methods(http.MethodPost, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.updatePostHandler).Methods(http.MethodPut, http.MethodOptions)
 	api.router.HandleFunc("/posts/{id}", api.deletePostHandler).Methods(http.MethodDelete, http.MethodOptions)
 
@@ -49,6 +51,10 @@ func (api *API) endpoints() {
 	//добавление пользователя
 	api.router.HandleFunc("/add-user", api.addUserPageHandler).Methods("GET") // Для отображения формы
 	api.router.HandleFunc("/add-user", api.addUserHandler).Methods("POST")    // Для обработки формы
+
+	//добавление поста
+	api.router.HandleFunc("/add-post", api.addPostPageHandler).Methods("GET") // Для отображения формы
+	api.router.HandleFunc("/add-post", api.addPostHandler).Methods("POST")    // Для обработки формы
 }
 
 // Обработчик статических файлов
@@ -118,19 +124,93 @@ func (api *API) postsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Добавление публикации.
+//VER1
+// func (api *API) addPostHandler(w http.ResponseWriter, r *http.Request) {
+// 	var p storage.Post
+
+// 	err := json.NewDecoder(r.Body).Decode(&p)
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+
+//		err = api.db.AddPost(p)
+//		if err != nil {
+//			http.Error(w, err.Error(), http.StatusInternalServerError)
+//			return
+//		}
+//		w.WriteHeader(http.StatusOK)
+//	}
+//
+// Добавление публикации.
 func (api *API) addPostHandler(w http.ResponseWriter, r *http.Request) {
-	var p storage.Post
-	err := json.NewDecoder(r.Body).Decode(&p)
+	// Парсим данные формы
+	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Ошибка парсинга формы", http.StatusInternalServerError)
 		return
 	}
+
+	// Извлекаем значения из формы
+	title := r.FormValue("title")
+	content := r.FormValue("content")
+	authorID := r.FormValue("author_id")
+
+	// Проверяем, что authorID не пустой
+	if authorID == "" {
+		http.Error(w, "Автор не выбран", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("Заголовок:", title)
+	fmt.Println("Контент:", content)
+	fmt.Println("Автор:", authorID)
+
+	// Преобразуем authorID в int
+	authorIDInt, err := strconv.Atoi(authorID)
+	if err != nil {
+		http.Error(w, "Неверный формат author_id", http.StatusBadRequest)
+		return
+	}
+
+	// Создаем новый объект Post
+	p := storage.Post{
+		Title:     title,
+		Content:   content,
+		AuthorID:  authorIDInt,       // Используем преобразованный int
+		CreatedAt: time.Now().Unix(), // Устанавливаем текущую метку времени
+	}
+
+	// Добавляем публикацию в базу данных
 	err = api.db.AddPost(p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
+}
+
+// для html
+func (api *API) addPostPageHandler(w http.ResponseWriter, r *http.Request) {
+	// Загружаем список авторов
+	authors, err := api.db.GetAuthors()
+	if err != nil {
+		http.Error(w, "Ошибка загрузки авторов", http.StatusInternalServerError)
+		return
+	}
+
+	// Создаём объект данных для шаблона
+	data := storage.PageData{Authors: authors}
+
+	// Парсим и рендерим шаблон
+	tmpl, err := template.ParseFiles("templates/add_post.html")
+	if err != nil {
+		http.Error(w, "Ошибка загрузки страницы", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, data)
 }
 
 // Обновление публикации.

@@ -25,7 +25,7 @@ header {
 
 .header__container {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     max-width: 1200px;
     width: 100%;
 }
@@ -37,11 +37,16 @@ header {
     color: #6cb1ff;
 }
 
-
+.header__item {
+    margin-right: 40px;
+}
 
 
 h1, h2 {
     color: #333;
+}
+h1 {
+    margin: 40px 0 50px 0;
 }
 h2 {
     margin: 5px 0;
@@ -56,6 +61,14 @@ h2 {
 
 .post__content, .post__authorBlock__time {
     color:rgba(6,6,15,0.6);
+}
+
+
+.post__hr {
+    margin: 10px 0 15px 0;
+    height: 3px;
+    background: #cccccc;
+    border-radius: 20px;
 }
 
 .post__authorBlock {

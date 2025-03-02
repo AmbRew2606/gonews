@@ -9,7 +9,8 @@
 <body>
     <header>
         <div class="header__container">
-            <a href="/post" class="header__item"><span>Все статьи</span></a>
+            <a href="/" class="header__item"><span>Все статьи</span></a>
+            <a href="/add-post" class="header__item"><span>Добавить статью</span></a>
             <a href="/add-user" class="header__item"><span>Добавить пользователя</span></a>
         </div>
     </header>
@@ -25,6 +26,7 @@
                 <div class="post__content">
                     <p>{{.Content}}</p>
                 </div>
+                <div class="post__hr"></div>
                 <div class="post__authorBlock">
                     <img src="{{.Author.AvatarURL}}" alt="{{.Author.Name}}" class="post__authorBlock__avatar">
                     <div class="post__authorBlock_info">
