@@ -124,25 +124,6 @@ func (api *API) postsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Добавление публикации.
-//VER1
-// func (api *API) addPostHandler(w http.ResponseWriter, r *http.Request) {
-// 	var p storage.Post
-
-// 	err := json.NewDecoder(r.Body).Decode(&p)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-//		err = api.db.AddPost(p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		w.WriteHeader(http.StatusOK)
-//	}
-//
-// Добавление публикации.
 func (api *API) addPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Парсим данные формы
 	err := r.ParseForm()
@@ -213,45 +194,6 @@ func (api *API) addPostPageHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, data)
 }
 
-// Обновление публикации.
-// VER 1
-//
-//	func (api *API) updatePostHandler(w http.ResponseWriter, r *http.Request) {
-//		var p storage.Post
-//		err := json.NewDecoder(r.Body).Decode(&p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		err = api.db.UpdatePost(p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		w.WriteHeader(http.StatusOK)
-//	}
-//
-// VER 2
-//
-//	func (api *API) updatePostHandler(w http.ResponseWriter, r *http.Request) {
-//		vars := mux.Vars(r) // Получаем параметры из URL
-//		id := vars["id"]    // Получаем ID из URL
-//		var p storage.Post
-//		err := json.NewDecoder(r.Body).Decode(&p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		p.ID = id // Присваиваем ID из URL
-//		err = api.db.UpdatePost(p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		w.WriteHeader(http.StatusOK)
-//	}
-//
-// VER 3
 func (api *API) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r) // Получаем параметры из URL
 	idStr := vars["id"] // Получаем ID как строку
@@ -280,24 +222,6 @@ func (api *API) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Удаление публикации.
-// VER 1
-//
-//	func (api *API) deletePostHandler(w http.ResponseWriter, r *http.Request) {
-//		var p storage.Post
-//		err := json.NewDecoder(r.Body).Decode(&p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		err = api.db.DeletePost(p)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusInternalServerError)
-//			return
-//		}
-//		w.WriteHeader(http.StatusOK)
-//	}
-//
-// VAR 2
 func (api *API) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r) // Получаем параметры из URL
 	idStr := vars["id"] // Получаем ID из URL

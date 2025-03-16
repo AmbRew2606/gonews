@@ -1,104 +1,5 @@
-<!-- <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить пользователя</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h2>Добавить нового пользователя</h2>
-    <form action="/add-user" method="POST" enctype="multipart/form-data">
-        <label for="name">Имя:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="avatar">Аватар:</label>
-        <input type="file" id="avatar" name="avatar" accept="image/*" required>
-
-        <button type="submit">Добавить</button>
-    </form>
-</body>
-</html>
- -->
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="ru">
-        <!-- <style>
-            
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        
-        textarea {
-            resize: vertical;
-            height: 100px;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-        textarea:focus-visible {
-            border-color: #007bff; 
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); 
-            outline: none;
-        }
-        input:focus-visible {
-            border-color: #007bff; 
-            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); 
-            outline: none;
-        }
-
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .form-test {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-        }
-
-        .form__input {
-            display: flex;
-            margin-top: 10px;
-        }
-    </style> -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,57 +15,27 @@
         </div>
     </header>
     <main>
+
         <h1>Добавить нового пользователя</h1>
 
-        <div class="form-test">
-
+        <div class="form__container">
             <form action="/add-user" method="POST" enctype="multipart/form-data">
-                <div class="user-name">
+                <div class="user__name">
                     <label for="name">Имя:</label>
                     <div class="form__input">
                         <input type="text" id="name" name="name" required>
                     </div>
                 </div>
-                <div class="user-avatar">
+                <div class="user__avatar">
                     <label for="avatar">Аватар:</label>
                     <div class="form__input">
                         <input type="file" id="avatar" name="avatar" accept="image/*" required>
                     </div>
                 </div>
-                <button type="submit">Добавить</button>
-
+                <button class="form__button__submit" type="submit">Добавить</button>
             </form>
-            <!-- <form action="/add-post" method="POST" enctype="multipart/form-data">
-
-        
-                <div class="title">
-                    <label for="title">Заголовок:</label>
-                    <div class="form__input">
-                        <input type="text" id="title" name="title" placeholder="Новость дня" required>
-                    </div>
-                </div>
-                <div class="content">
-                    <label for="content">Контент:</label>
-                    <div class="form__input">
-                        <textarea id="content" name="content" placeholder="Введите текст новости..." required></textarea>
-                    </div>
-                </div>
-
-                <div class="author">
-                    <label for="author">Автор:</label>
-                    <div class="form__input">
-                        <select id="author" name="author" required>
-                            <option value="" disabled selected>Выберите автора</option>
-                            {{range .Authors}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
-
-                <button type="submit">Опубликовать</button>
-            </form> -->
         </div>
+
     </main>
 </body>
 </html>

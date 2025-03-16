@@ -2,12 +2,13 @@ package storage
 
 // Post - публикация.
 type Post struct {
-	ID        int
-	Title     string
-	Content   string
-	AuthorID  int
-	Author    Author
-	CreatedAt int64
+	ID            int
+	Title         string
+	Content       string
+	AuthorID      int
+	Author        Author
+	CreatedAt     int64
+	FormattedDate string // Дополнительное поле для вывода в шаблон
 	// PublishedAt int64
 }
 

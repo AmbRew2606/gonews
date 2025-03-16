@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"time"
 
 	"GoNews/pkg/storage"
 
@@ -19,33 +20,33 @@ type Store struct {
 
 // New - подключение к БД PostgreSQL
 func New() (*Store, error) {
-	// Читаем переменные окружения (они уже загружены в server.go)
+	// повторная проверка переменных
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_NAME")
 
-	// Проверяем, что все переменные загружены
+	// Проверка переменных .env
 	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
 		return nil, fmt.Errorf("не все переменные окружения загружены")
 	}
 
-	// Экранируем пароль (если есть спецсимволы)
+	// Экранизация пароля (если требуется)
 	escapedPassword := url.QueryEscape(password)
 
-	// Формируем строку подключения
+	// Строка подключения
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, escapedPassword, dbname)
 
-	// Открываем соединение с БД
+	// Открытие соединения с БД
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Printf("Ошибка подключения к PostgreSQL: %v", err)
 		return nil, fmt.Errorf("ошибка подключения к БД: %w", err)
 	}
 
-	// Проверяем подключение
+	// Проверка подключения
 	err = db.Ping()
 	if err != nil {
 		log.Printf("Ошибка пинга PostgreSQL: %v", err)
@@ -65,85 +66,6 @@ func (s *Store) Close() {
 	}
 }
 
-// // New создаёт новое подключение к PostgreSQL.
-// func New(dsn string) (*Store, error) {
-// 	db, err := sql.Open("postgres", dsn)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("ошибка подключения к PostgreSQL: %w", err)
-// 	}
-
-// 	// Проверим подключение
-// 	if err := db.Ping(); err != nil {
-// 		return nil, fmt.Errorf("ошибка проверки соединения: %w", err)
-// 	}
-
-// 	return &Store{db: db}, nil
-// }
-
-// Получение всех публикаций
-// VER 1
-// func (s *Store) Posts() ([]storage.Post, error) {
-// 	rows, err := s.db.Query("SELECT id, title, content, author_id, created_at FROM posts")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []storage.Post
-// 	for rows.Next() {
-// 		var p storage.Post
-// 		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.AuthorID, &p.CreatedAt); err != nil {
-// 			return nil, err
-// 		}
-// 		posts = append(posts, p)
-// 	}
-
-// 	return posts, nil
-// }
-
-// VER 2
-// func (db *Store) Posts() ([]storage.Post, error) {
-
-// 	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.name FROM posts JOIN authors ON posts.author_id = authors.id")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []storage.Post
-// 	for rows.Next() {
-// 		var p storage.Post
-// 		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorName)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		posts = append(posts, p)
-// 	}
-
-//		return posts, nil
-//	}
-//
-// VER 3
-// func (s *Store) Posts() ([]storage.Post, error) {
-// 	rows, err := s.db.Query("SELECT posts.id, posts.title, posts.content, posts.created_at, authors.id, authors.name, authors.avatar_url FROM posts JOIN authors ON posts.author_id = authors.id")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer rows.Close()
-
-// 	var posts []storage.Post
-// 	for rows.Next() {
-// 		var p storage.Post
-// 		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.AuthorID, &p.AuthorName, &p.AuthorAvatar); err != nil {
-// 			return nil, err
-// 		}
-// 		posts = append(posts, p)
-// 	}
-
-//		return posts, nil
-//	}
-//
-// VER 4
 func (s *Store) Posts() ([]storage.Post, error) {
 	rows, err := s.db.Query(`
         SELECT posts.id, posts.title, posts.content, posts.created_at, 
@@ -159,11 +81,15 @@ func (s *Store) Posts() ([]storage.Post, error) {
 	var posts []storage.Post
 	for rows.Next() {
 		var p storage.Post
-		var a storage.Author // Создаём объект автора
+		var a storage.Author //объект автора
+		var createdAtUnix int64
 
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &a.ID, &a.Name, &a.AvatarURL); err != nil {
+		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &createdAtUnix, &a.ID, &a.Name, &a.AvatarURL); err != nil {
 			return nil, err
 		}
+		// Конвертируем Unix timestamp в строку с форматом даты
+		p.CreatedAt = createdAtUnix
+		p.FormattedDate = time.Unix(createdAtUnix, 0).Format("02.01.2006 15:04")
 
 		p.Author = a // Присваиваем автора в структуру поста
 		posts = append(posts, p)
@@ -192,26 +118,6 @@ func (s *Store) DeletePost(p storage.Post) error {
 	_, err := s.db.Exec("DELETE FROM posts WHERE id=$1", p.ID)
 	return err
 }
-
-// Добавление публикации
-// func (s *Store) AddPost(p storage.Post) error {
-// 	_, err := s.db.Exec("INSERT INTO posts (title, content, author_id, author_name, created_at, published_at) VALUES ($1, $2, $3, $4, $5, $6)",
-// 		p.Title, p.Content, p.AuthorID, p.AuthorName, p.CreatedAt, p.PublishedAt)
-// 	return err
-// }
-
-// // Обновление публикации
-// func (s *Store) UpdatePost(p storage.Post) error {
-// 	_, err := s.db.Exec("UPDATE posts SET title=$1, content=$2, author_id=$3, author_name=$4, created_at=$5, published_at=$6 WHERE id=$7",
-// 		p.Title, p.Content, p.AuthorID, p.AuthorName, p.CreatedAt, p.PublishedAt, p.ID)
-// 	return err
-// }
-
-// // Удаление публикации
-// func (s *Store) DeletePost(p storage.Post) error {
-// 	_, err := s.db.Exec("DELETE FROM posts WHERE id=$1", p.ID)
-// 	return err
-// }
 
 func (s *Store) AddAuthor(a storage.Author) error {
 	_, err := s.db.Exec(`INSERT INTO authors (name, avatar_url) VALUES ($1, $2)`, a.Name, a.AvatarURL)

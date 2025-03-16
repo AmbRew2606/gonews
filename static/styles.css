@@ -1,13 +1,7 @@
+/* TEGS STYLE */
 body {
     font-family: Arial, sans-serif;
     margin: 0px;
-}
-
-
-main {
-    margin: 0 auto;
-    width: 1200px;
-    max-width: 100%;
 }
 
 header {
@@ -23,6 +17,66 @@ header {
     justify-content: center;
 }
 
+main {
+    margin: 0 auto;
+    width: 1200px;
+    max-width: 100%;
+}
+
+h1, h2 {
+    color: #333;
+}
+h1 {
+    margin: 40px 0 50px 0;
+}
+h2 {
+    margin: 0 0 5px 0;
+}
+
+form {
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+textarea {
+    resize: vertical;
+    height: 100px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+textarea:focus-visible {
+    border-color: #007bff; /* Новый цвет при focus-visible */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); /* Добавляем небольшой glow-эффект */
+    outline: none;
+}
+
+input:focus-visible {
+    border-color: #007bff; /* Новый цвет при focus-visible */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); /* Добавляем небольшой glow-эффект */
+    outline: none;
+}
+
+
+/*CLASS STYLE*/
+/* header__ */
 .header__container {
     display: flex;
     justify-content: flex-start;
@@ -42,16 +96,7 @@ header {
 }
 
 
-h1, h2 {
-    color: #333;
-}
-h1 {
-    margin: 40px 0 50px 0;
-}
-h2 {
-    margin: 5px 0;
-}
-
+/* post__ */
 .post__container {
     border: 1px solid #ddd;
     padding: 25px;
@@ -59,16 +104,47 @@ h2 {
     border-radius: 12px;
 }
 
-.post__content, .post__authorBlock__time {
-    color:rgba(6,6,15,0.6);
+.post__header {
+    display: flex; 
+    justify-content: space-between;
 }
 
+.post__id {
+    font-size: 12px;
+    color: #ccc;
+}
+
+.post__delete-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #ff4d4d; 
+    transition: color 0.3s ease-in-out;
+}
+
+.post__delete-btn:hover {
+color: #d32f2f; 
+}
+
+.post__delete-btn:focus {
+outline: none;
+}
+
+.post__delete-btn::after {
+content: '✖'; 
+}
 
 .post__hr {
     margin: 10px 0 15px 0;
     height: 3px;
-    background: #cccccc;
+    background: #eeeeee;
     border-radius: 20px;
+}
+
+.post__content, .post__authorBlock__time {
+    color:rgba(6,6,15,0.6);
 }
 
 .post__authorBlock {
@@ -78,43 +154,46 @@ h2 {
     max-height: 32px;
 }
 
-.post__authorBlock_info {
+.post__authorBlock__time {
+    font-size: 12px;
+}
+.post__authorBlock__info {
     margin-left: 10px;
 }
-
 .post__authorBlock__avatar {
     border-radius: 50%;
 }
 
 
+/*form__*/
+.form__container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+}
 
+.form__input {
+    display: flex;
+    margin-top: 10px;
+}
 
-
-
-
-/*из index.html*/
-.delete-btn {
-    background: none;
+.form__button__submit {
+    background-color: #007bff;
+    color: white;
     border: none;
-    font-size: 20px;
-    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
-    color: #ff4d4d; /* Красный цвет */
-    transition: color 0.3s ease-in-out;
+    transition: background 0.3s;
 }
 
-.delete-btn:hover {
-color: #d32f2f; /* Темнее при наведении */
+.form__button__submit:hover {
+    background-color: #0056b3;
 }
 
-.delete-btn:focus {
-outline: none;
-}
 
-.delete-btn::after {
-content: '✖'; /* Сам крестик */
-}
-
+/*modal__*/
 .modal {
 display: none; /* По умолчанию скрыта */
 position: fixed;
@@ -128,14 +207,14 @@ justify-content: center;
 align-items: center;
 }
 
-.modal-content {
+.modal__content {
 background: white;
 padding: 20px;
 border-radius: 10px;
 text-align: center;
 }
 
-.confirm-btn {
+.modal__confirm-btn {
 background-color: #ff4d4d;
 color: white;
 padding: 10px;
@@ -143,91 +222,19 @@ border: none;
 cursor: pointer;
 }
 
-.cancel-btn {
+.modal__cancel-btn {
 background-color: #ccc;
 padding: 10px;
 border: none;
 cursor: pointer;
 }
 
-.btns {
+.modal__btns {
 display: flex;
 justify-content: space-between;
 gap: 10px;
 }
 
-.btns button {
+.modal__btns button {
 width: 100%;
-}
-
-
-
-/*из add user*/
-form {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 1200px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-label {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-
-textarea {
-    resize: vertical;
-    height: 100px;
-    font-family: Arial, Helvetica, sans-serif;
-}
-textarea:focus-visible {
-    border-color: #007bff; /* Новый цвет при focus-visible */
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); /* Добавляем небольшой glow-эффект */
-    outline: none;
-}
-input:focus-visible {
-    border-color: #007bff; /* Новый цвет при focus-visible */
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3); /* Добавляем небольшой glow-эффект */
-    outline: none;
-}
-
-
-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.form-test {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-}
-
-.form__input {
-    display: flex;
-    margin-top: 10px;
 }
